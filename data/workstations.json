@@ -1,0 +1,18 @@
+[
+  { "id": 1, "label": "Workstation 1", "type": "normal" },
+  { "id": 2, "label": "Workstation 2", "type": "normal" },
+  { "id": 3, "label": "Workstation 3", "type": "normal" },
+  { "id": 4, "label": "Workstation 4", "type": "normal" },
+  { "id": 5, "label": "Workstation 5 (Feeder)", "type": "feeder" },
+  { "id": 6, "label": "Workstation 6 (Junction)", "type": "junction" },
+  { "id": 7, "label": "Workstation 7 (Junction)", "type": "junction" },
+  { "id": 8, "label": "Workstation 8", "type": "normal" },
+  { "id": 9, "label": "Workstation 9 (Feeder)", "type": "feeder" },
+  { "id": 10, "label": "Workstation 10 (Junction)", "type": "junction" },
+  { "id": 11, "label": "Workstation 11 (Feeder)", "type": "feeder" },
+  { "id": 12, "label": "Workstation 12 (Feeder)", "type": "feeder" },
+  { "id": 13, "label": "Workstation 13 (Junction)", "type": "junction" },
+  { "id": 14, "label": "Workstation 14", "type": "normal" },
+  { "id": 15, "label": "Workstation 15 (Quality Check)", "type": "quality" },
+  { "id": 16, "label": "Workstation 16 (Rework)", "type": "rework" }
+]

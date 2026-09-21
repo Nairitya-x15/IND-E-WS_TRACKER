@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next/
+/out/
+
+# production
+/build
+
+# local env files (never commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# google service account key files
+*.json.key
+ie-205-*.json
+*-firebase-adminsdk-*.json
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+.vercel

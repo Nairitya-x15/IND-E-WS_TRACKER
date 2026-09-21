@@ -1,0 +1,71 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  --bg: #f7f5f1;
+  --surface: #ffffff;
+  --surface-sunken: #f4f2ee;
+  --border: #e4e0d8;
+  --border-strong: #d6d1c5;
+
+  --text: #2b2a26;
+  --text-muted: #706b60;
+  --text-faint: #9d9789;
+
+  --accent: #4f6d5c;
+  --accent-hover: #3e5849;
+  --accent-soft: #e7ede9;
+
+  --danger: #a8503b;
+  --danger-hover: #8d4230;
+  --danger-soft: #f4e6e1;
+
+  --focus-ring: rgba(79, 109, 92, 0.28);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(43, 42, 38, 0.04), 0 1px 1px rgba(43, 42, 38, 0.03);
+  --shadow: 0 2px 6px rgba(43, 42, 38, 0.05), 0 1px 2px rgba(43, 42, 38, 0.04);
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --font-mono: "SF Mono", ui-monospace, "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+
+/* Faint, hand-drawn-feeling background texture so the page doesn't read as a flat AI gradient */
+body {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.035) 1px, transparent 0);
+  background-size: 22px 22px;
+}

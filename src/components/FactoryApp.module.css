@@ -1,0 +1,36 @@
+.main {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 18px 64px;
+}
+
+.container {
+  width: 100%;
+  max-width: 460px;
+}
+
+.header {
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.65rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
