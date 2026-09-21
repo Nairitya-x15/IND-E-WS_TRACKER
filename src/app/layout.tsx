@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Factory Station Tracker",
+  title: "IndE - Workstation session tracking tool",
   description: "Workstation session tracking tool",
 };
 
