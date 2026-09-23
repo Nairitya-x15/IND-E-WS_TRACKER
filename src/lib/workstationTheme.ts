@@ -6,4 +6,6 @@ export const workstationTypeMeta: Record<WorkstationType, { label: string; tag: 
   junction: { label: "Junction", tag: "JCT" },
   quality: { label: "Quality check", tag: "QC" },
   rework: { label: "Rework", tag: "RWK" },
+  materialHandler: { label: "Material handler", tag: "MH" },
+  lineSupervisor: { label: "Line supervisor", tag: "LS" },
 };

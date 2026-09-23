@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import SessionStartForm from "./SessionStartForm";
 import WorkScreen from "./WorkScreen";
+import RoleEntryScreen from "./RoleEntryScreen";
+import { getWorkstationType, isEntryRole } from "@/lib/workstations";
 import SessionSummary from "./SessionSummary";
 import { RunEntry, SessionInfo } from "@/lib/types";
 import styles from "./FactoryApp.module.css";
@@ -25,7 +27,8 @@ export default function FactoryApp() {
       if (raw) {
         const saved = JSON.parse(raw);
         if (saved.stage === "working" && saved.session) {
-          setSession(saved.session);
+          // Older saved sessions stored the workstation id as a number.
+          setSession({ ...saved.session, workstationId: String(saved.session.workstationId) });
           setRuns(saved.runs ?? []);
           setSessionStartedAt(saved.sessionStartedAt ?? null);
           setStage("working");
@@ -82,14 +85,23 @@ export default function FactoryApp() {
 
         {stage === "setup" && <SessionStartForm onStart={handleStartSession} />}
 
-        {stage === "working" && session && (
-          <WorkScreen
-            session={session}
-            runs={runs}
-            onAddRun={handleAddRun}
-            onEndSession={handleEndSession}
-          />
-        )}
+        {stage === "working" &&
+          session &&
+          (isEntryRole(getWorkstationType(session.workstationId)) ? (
+            <RoleEntryScreen
+              session={session}
+              runs={runs}
+              onAddRun={handleAddRun}
+              onEndSession={handleEndSession}
+            />
+          ) : (
+            <WorkScreen
+              session={session}
+              runs={runs}
+              onAddRun={handleAddRun}
+              onEndSession={handleEndSession}
+            />
+          ))}
 
         {stage === "summary" && session && sessionStartedAt && sessionEndedAt && (
           <SessionSummary

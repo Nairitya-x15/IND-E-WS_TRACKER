@@ -37,7 +37,7 @@ export default function SessionStartForm({ onStart }: Props) {
     onStart({
       assemblerId: Number(assemblerId),
       team,
-      workstationId: Number(workstationId),
+      workstationId,
       date,
       shift,
     });
@@ -70,7 +70,7 @@ export default function SessionStartForm({ onStart }: Props) {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="workstation">Workstation</label>
+        <label htmlFor="workstation">Workstation / Role</label>
         <select
           id="workstation"
           value={workstationId}
@@ -78,7 +78,7 @@ export default function SessionStartForm({ onStart }: Props) {
           required
         >
           <option value="" disabled>
-            Select workstation
+            Select workstation or role
           </option>
           {workstations.map((ws) => (
             <option key={ws.id} value={ws.id}>

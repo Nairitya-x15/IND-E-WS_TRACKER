@@ -1,13 +1,15 @@
 # Factory Station Tracker
 
 A small Next.js (TypeScript) app for ~50 factory workers to log start/stop
-work sessions at 16 workstations, writing every run straight into a Google
-Sheet.
+work sessions at 16 workstations (workstation 10 is split into **10A** and
+**10B**), plus two non-workstation roles — **Material Handler** and
+**Line Supervisor** — writing every entry straight into a Google Sheet.
 
 ## How it works
 
 1. **Session setup** — worker picks their Roll No. (Assembler ID, dropdown
-   4501–4539) and Workstation (1–16). Team (ODD/EVEN) is derived from the
+   4501–4539) and a Workstation / Role (1–9, 10A, 10B, 11–16, Material Handler,
+   Line Supervisor). Team (ODD/EVEN) is derived from the
    roll number automatically. Date is filled with today's date. Shift is
    auto-set from the current time (Shift 1: 2:00–3:30 PM, Shift 2:
    3:30–5:00 PM) but stays editable.
@@ -16,6 +18,9 @@ Sheet.
    and an optional remarks box appear; clicking Stop saves that run as one
    row in the Google Sheet and returns to the Start screen for the next run.
    **End Session** finishes the whole session.
+   **Material Handler / Line Supervisor** have no Start/Stop timer: they fill in
+   a short form and press **Submit**, which writes one row (with the time of
+   submission) and clears the form for the next entry.
 3. **Session summary** — total time worked, idle time, utilization %, and
    number of products worked on, plus a table of every run.
 
@@ -25,9 +30,24 @@ Sheet.
 |---|---|---|---|
 | Normal | 1, 2, 3, 4, 8, 14 | Product ID | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Product Number (last 3 digits) \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) |
 | Feeder | 5, 9, 11, 12 | Component ID | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Component ID \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) |
-| Junction | 6, 7, 10, 13 | Product ID + Component ID | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Product Number (last 3 digits) \| Component ID \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) |
+| Junction | 6, 7, 10A, 10B, 13 | Product ID + Component ID | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Product Number (last 3 digits) \| Component ID \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) |
 | Quality Check | 15 | Product ID + Quality Report (Major/Minor/OK) | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Product Number (last 3 digits) \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) \| Quality Result |
 | Rework | 16 | Product ID | Date \| Shift \| Team \| WS \| Assembler ID (Roll no.) \| Product Number (last 3 digits) \| Start Time (hh:mm.s) \| End Time (hh:mm.s) \| Remarks \| TimeDiff (hh:mm:s) |
+
+### Material Handler and Line Supervisor
+
+These two roles have their own tab layouts — no WS column, no start/end time,
+no TimeDiff, just a single submission **Time**.
+
+| Role | Fields | Sheet tab header row (A → last column) |
+|---|---|---|
+| Line Supervisor | WIP (text), Between Workstation (`1-2`, `2-3` … `15-16`), Remarks | Date \| Shift \| Team \| Assembler ID (Roll no.) \| WIP \| Between Workstation \| Time \| Remarks |
+| Material Handler | Material (text), Provided to which workstation (`1`–`16`), Remarks | Date \| Shift \| Team \| Assembler ID (Roll no.) \| Material \| Provided to which workstation \| Time \| Remarks |
+
+Time is the moment **Submit** was pressed (`HH:MM:SS`). WIP, Between Workstation,
+Material and the workstation are required; Remarks is optional. The option lists
+live in `src/lib/workstations.ts` (`BETWEEN_WORKSTATION_OPTIONS`,
+`PROVIDED_TO_WORKSTATION_OPTIONS`) if they ever need changing.
 
 **Each tab's header row must match its type exactly** (column order matters —
 the app appends values positionally, not by header name). `TimeDiff` is
@@ -58,12 +78,17 @@ npm install
 
 The app writes to this sheet: https://docs.google.com/spreadsheets/d/1RqO40WOyai3x7jhMnX6JANrPJDD7PipCvbqq2jt0U-0/edit
 
-Each workstation writes to a tab named `ws{n}` (e.g. `ws1`, `ws2`, ... `ws16`).
-**Make sure each of those 16 tabs exists**, with this header row in row 1:
+Each workstation/role writes to the tab named in its `sheetName` field in
+`data/workstations.json`. **These tab names must exist in the sheet exactly as
+written:**
 
 ```
-Date | Shift | Team | WS | Assembler ID | Start Time | End Time | Duration (sec) | Product ID | Component ID | Quality Report | Remarks
+WS1  WS2  WS3  WS4  WS5  WS6  WS7  WS8  WS9  WS10A  WS10B  WS11  WS12  WS13  WS14  WS15  WS16
+Material Handler   Line Supervisor
 ```
+
+Row 1 of every tab must contain the header row for its type (see the tables
+above). To add or rename a station, edit `data/workstations.json`.
 
 ### Create a service account (one-time)
 

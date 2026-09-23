@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDuration } from "@/lib/time";
+import { getStationDisplayName, getWorkstationType } from "@/lib/workstations";
 import { RunEntry, SessionInfo } from "@/lib/types";
 import styles from "./SessionSummary.module.css";
 
@@ -23,6 +24,69 @@ export default function SessionSummary({
   const sessionDurationSeconds = Math.max(1, Math.floor((sessionEndedAt - sessionStartedAt) / 1000));
   const idleSeconds = Math.max(0, sessionDurationSeconds - totalWorkedSeconds);
   const utilization = ((totalWorkedSeconds / sessionDurationSeconds) * 100).toFixed(1);
+
+  // Material Handler / Line Supervisor: no timer, so no idle time or utilization --
+  // just how many entries were submitted, and what they were.
+  const roleType = getWorkstationType(session.workstationId);
+  if (roleType === "materialHandler" || roleType === "lineSupervisor") {
+    const isLineSupervisor = roleType === "lineSupervisor";
+    return (
+      <div className={styles.wrapper}>
+        <h2 className={styles.heading}>Session Summary</h2>
+        <p className={styles.subtitle}>
+          Assembler {session.assemblerId} · {getStationDisplayName(session.workstationId)} · Shift{" "}
+          {session.shift}
+        </p>
+
+        <div className={styles.statGrid}>
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>Entries Submitted</span>
+            <span className={styles.statValue}>{runs.length}</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>Session Duration</span>
+            <span className={styles.statValue}>{formatDuration(sessionDurationSeconds)}</span>
+          </div>
+        </div>
+
+        {runs.length > 0 && (
+          <div>
+            <p className={styles.sectionTitle}>Entry Details</p>
+            <div className={styles.runsTableWrapper}>
+              <table className={styles.runsTable}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Time</th>
+                    <th>{isLineSupervisor ? "WIP" : "Material"}</th>
+                    {!isLineSupervisor && <th>Amount</th>}
+                    <th>{isLineSupervisor ? "Between WS" : "Provided To WS"}</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.map((r, i) => (
+                    <tr key={r.id}>
+                      <td>{i + 1}</td>
+                      <td>{r.submittedTime || r.endTime}</td>
+                      <td>{(isLineSupervisor ? r.wip : r.material) || "-"}</td>
+                      {!isLineSupervisor && <td>{r.amount || "-"}</td>}
+                      <td>{(isLineSupervisor ? r.betweenWorkstation : r.providedTo) || "-"}</td>
+                      <td>{r.remarks || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <button className={styles.newSessionButton} onClick={onNewSession}>
+          Start New Session
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

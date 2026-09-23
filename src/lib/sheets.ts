@@ -28,12 +28,15 @@ function getSheetsClient() {
 }
 
 /**
- * Appends one row to the sheet tab named "ws{workstationId}", e.g. "ws5".
- * Column order must match the header row set up in each tab -- see README.md.
+ * Appends one row to the given sheet tab, e.g. "WS5", "WS10A",
+ * "Material Handler". Column order must match the header row set up in each
+ * tab -- see README.md.
  */
-export async function appendRunRow(workstationId: number, row: (string | number)[]) {
+export async function appendRunRow(sheetName: string, row: (string | number)[]) {
   const { sheets, spreadsheetId } = getSheetsClient();
-  const range = `ws${workstationId}!A1`;
+  // Tab names must be single-quoted in A1 notation when they contain spaces;
+  // quoting always is harmless. A literal ' inside a name is doubled.
+  const range = `'${sheetName.replace(/'/g, "''")}'!A1`;
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
