@@ -33,6 +33,7 @@ export default function WorkScreen({ session, runs, onAddRun, onEndSession }: Pr
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showEndConfirm, setShowEndConfirm]=useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -220,10 +221,51 @@ export default function WorkScreen({ session, runs, onAddRun, onEndSession }: Pr
 
       <div className={styles.footer}>
         <p>Completed runs this session: {runs.length}</p>
-        <button className={styles.endButton} onClick={onEndSession} disabled={runStage === "active"}>
+        <button
+          className={styles.endButton}
+          onClick={() => setShowEndConfirm(true)}
+          disabled={runStage === "active"}
+        >
           End Session
         </button>
       </div>
+      {showEndConfirm && (
+        <div
+          className={styles.modalOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="endSessionTitle"
+          onClick={() => setShowEndConfirm(false)}
+        >
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 id="endSessionTitle" className={styles.modalTitle}>
+              End this session?
+            </h3>
+            <p className={styles.modalText}>
+              This will finish your session and take you to the summary. You won&apos;t
+              be able to add more runs afterwards.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowEndConfirm(false)}
+                autoFocus
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmEndButton}
+                onClick={() => {
+                  setShowEndConfirm(false);
+                  onEndSession();
+                }}
+              >
+                Yes, end session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

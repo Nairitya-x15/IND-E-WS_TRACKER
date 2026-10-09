@@ -36,6 +36,7 @@ export default function RoleEntryScreen({ session, runs, onAddRun, onEndSession 
   const [remarks, setRemarks] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   const canSubmit = isLineSupervisor
     ? wip.trim() !== "" && betweenWorkstation !== ""
@@ -220,12 +221,55 @@ export default function RoleEntryScreen({ session, runs, onAddRun, onEndSession 
         <button
           type="button"
           className={styles.endButton}
-          onClick={onEndSession}
+          onClick={() => setShowEndConfirm(true)}
           disabled={submitting}
         >
           End Session
         </button>
       </div>
+      <div className={styles.footer}>
+        ...
+      </div>
+
+      {showEndConfirm && (
+        <div
+          className={styles.modalOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="endSessionTitle"
+          onClick={() => setShowEndConfirm(false)}
+        >
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 id="endSessionTitle" className={styles.modalTitle}>
+              End this session?
+            </h3>
+            <p className={styles.modalText}>
+              This will finish your session and take you to the summary. You
+              won&apos;t be able to add more entries afterwards.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={() => setShowEndConfirm(false)}
+                autoFocus
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmEndButton}
+                onClick={() => {
+                  setShowEndConfirm(false);
+                  onEndSession();
+                }}
+              >
+                Yes, end session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
