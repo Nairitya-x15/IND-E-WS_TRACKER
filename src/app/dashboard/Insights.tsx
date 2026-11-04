@@ -7,13 +7,14 @@ import {
 } from "recharts";
 import type { DashRun } from "@/lib/dashboard/types";
 import styles from "./dashboard.module.css";
+import { isFlow, NOT_COMPARABLE } from "@/lib/dashboard/roles";
 
 // Eras recorded BEFORE the efficiency changes. Every other era counts as "after".
 const BEFORE_ERAS = ["Original"];
-const ORDER_ERA = ["Original", "Pre-midsem", "Current"];
+const ORDER_ERA = ["Original", "Current"];
 const ORDER_CHANGE = ["Before changes", "After changes"];
 const COLORS: Record<string, string> = {
-  Original: "#706b60", "Pre-midsem": "#b8863b", Current: "#4f6d5c",
+  Original: "#706b60", Current: "#4f6d5c",
   "Before changes": "#706b60", "After changes": "#4f6d5c",
 };
 const MUTED = "#706b60";
@@ -62,7 +63,7 @@ const stationMed = (rs: DashRun[]) => {
 };
 
 export default function Insights({ all, era, ws }: { all: DashRun[]; era: string; ws: string }) {
-  const [mode, setMode] = useState<Mode>("change");
+  const mode = "change" as Mode;
   const [focus, setFocus] = useState("");
 
   const x = useMemo(() => {
@@ -75,7 +76,7 @@ export default function Insights({ all, era, ws }: { all: DashRun[]; era: string
     const groups = mode === "era" ? eraList : ORDER_CHANGE.filter((g) => all.some((r) => groupOf(r) === g));
     const eraRows = all.filter((r) => !era || r.era === era);
     const rows = eraRows.filter((r) => !ws || r.ws === ws);
-    const lineAll = all.filter((r) => isLine(r.ws));
+    const lineAll = all.filter((r) => isFlow(r.ws) && !NOT_COMPARABLE.includes(r.ws));
 
     // 1. Group comparison by station + 3. line balance
     const stations = [...new Set(lineAll.map((r) => r.ws))].sort(byNum);
@@ -132,7 +133,7 @@ export default function Insights({ all, era, ws }: { all: DashRun[]; era: string
 
     // 5. Waiting between stations + lead time per product
     const chains = new Map<string, DashRun[]>();
-    eraRows.filter((r) => isLine(r.ws) && r.product).forEach((r) => {
+      eraRows.filter((r) => isFlow(r.ws) && r.product).forEach((r) => {
       const k = [r.era, r.date, idKey(r.product)].join("|");
       chains.set(k, [...(chains.get(k) ?? []), r]);
     });
@@ -168,7 +169,7 @@ export default function Insights({ all, era, ws }: { all: DashRun[]; era: string
 
     // station focus (6 and 7)
     const stationsAll = [...new Set(all.map((r) => r.ws))].sort(byNum);
-    const es = stationMed(eraRows.filter((r) => isLine(r.ws)));
+    const es = stationMed(eraRows.filter((r) => isFlow(r.ws)));
     const bottleneck = es.length ? es.reduce((a, b) => (b.med > a.med ? b : a)).ws : stationsAll[0] ?? "";
     const focusEff = focus && stationsAll.includes(focus) ? focus : bottleneck;
 
@@ -229,15 +230,9 @@ export default function Insights({ all, era, ws }: { all: DashRun[]; era: string
           <div>
             <h2>Before and after the efficiency changes</h2>
             <p className={styles.sub}>
-              Median cycle time per station. {mode === "change"
-                ? "Before = Original. After = Pre-midsem and Current, which both keep the changes."
-                : "One bar per era."} Stations need {MIN_RUNS}+ runs in a group to appear.
+              Median cycle time per station, Original vs Current (after the efficiency changes). Rework (WS 16) is left out{NOT_COMPARABLE.length ? `, and so are stations ${NOT_COMPARABLE.join(", ")}, whose job changed between eras` : ""}. Stations need {MIN_RUNS}+ runs in a group to appear.
             </p>
           </div>
-          <select value={mode} onChange={(e) => setMode(e.target.value as Mode)} aria-label="Comparison">
-            <option value="change">Before vs after changes</option>
-            <option value="era">By era</option>
-          </select>
         </div>
         <div className={styles.chart}>
           {x.compare.length ? (

@@ -9,6 +9,7 @@ export interface DashRun {
   end: number;
   dur: number; // seconds
   remark: string;
+  quality: string;
 }
 
 export interface DashPayload {

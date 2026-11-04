@@ -27,6 +27,15 @@ function parseDate(raw: string): string | null {
   return `${y}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
 }
 
+function normQuality(v: string): string {
+  const t = v.trim().toUpperCase();
+  if (!t) return "";
+  if (t.startsWith("OK") || t === "PASS" || t === "GOOD") return "OK";
+  if (t.startsWith("MAJOR")) return "MAJOR";
+  if (t.startsWith("MINOR")) return "MINOR";
+  return t;
+}
+
 function findCols(header: string[]) {
   const h = header.map((x) => String(x).toLowerCase().trim());
   const f = (fn: (x: string) => boolean) => h.findIndex(fn);
@@ -39,6 +48,7 @@ function findCols(header: string[]) {
     start: f((x) => x.startsWith("start")),
     end: f((x) => x.startsWith("end")),
     remarks: f((x) => x.startsWith("remark")),
+    quality: f((x) => x.includes("quality") || x === "result" || x.includes("qc")),
   };
 }
 
@@ -52,7 +62,12 @@ function rowsToRuns(rows: string[][], tab: string, src: Source, warnings: string
     return [];
   }
   const c = findCols(rows[hi]);
-  const tabWs = (tab.match(/^WS\s*(\d+[AB]?)$/i)?.[1] ?? src.defaultWs ?? tab).toUpperCase();
+  const tabWs = (
+    src.tabAlias?.[tab.toUpperCase()] ??
+    tab.match(/^WS\s*(\d+[AB]?)/i)?.[1] ??
+    src.defaultWs ??
+    tab
+  ).toUpperCase();
   const out: DashRun[] = [];
   for (const r of rows.slice(hi + 1)) {
     const date = parseDate(r[c.date] ?? "");
@@ -70,6 +85,7 @@ function rowsToRuns(rows: string[][], tab: string, src: Source, warnings: string
       end: e,
       dur: e - s,
       remark: (r[c.remarks] ?? "").trim(),
+      quality: normQuality(r[c.quality] ?? ""),
     });
   }
   return out;

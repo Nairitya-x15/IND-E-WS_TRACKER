@@ -8,8 +8,10 @@ import {
 import type { DashPayload, DashRun } from "@/lib/dashboard/types";
 import styles from "./dashboard.module.css";
 import Insights from "./Insights";
+import Output from "./Output";
+import Quality from "./Quality";
 
-const ERA_COLORS: Record<string, string> = { Original: "#706b60", "Pre-midsem": "#b8863b", Current: "#4f6d5c" };
+const ERA_COLORS: Record<string, string> = { Original: "#706b60", Current: "#4f6d5c" };
 const LINE_COLORS = ["#4f6d5c", "#a8503b", "#b8863b", "#5b7fa6", "#7a5ea8", "#706b60", "#3f8f8f", "#9a6b3b"];
 const MUTED = "#706b60";
 
@@ -48,6 +50,7 @@ export default function DashboardPage() {
   const [ws, setWs] = useState("");
   const [day, setDay] = useState("");
   const [q, setQ] = useState("");
+  const [mode, setMode] = useState<"time" | "output">("time");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -140,14 +143,24 @@ export default function DashboardPage() {
           <p className={styles.sub}>{loading ? "Loading..." : `${v.rows.length} runs shown`}</p>
         </div>
         <div className={styles.filters}>
+          <div className={styles.modes} role="group" aria-label="Analysis mode">
+            <button className={`${styles.modeBtn} ${mode === "time" ? styles.modeOn : ""}`} onClick={() => setMode("time")}>
+              Time analysis
+            </button>
+            <button className={`${styles.modeBtn} ${mode === "output" ? styles.modeOn : ""}`} onClick={() => { setMode("output"); setWs(""); }}>
+              Output analysis
+            </button>
+          </div>
           <select value={era} onChange={(e) => setEra(e.target.value)} aria-label="Era">
             <option value="">All eras</option>
             {v.eras.map((x) => <option key={x}>{x}</option>)}
           </select>
-          <select value={ws} onChange={(e) => setWs(e.target.value)} aria-label="Workstation">
-            <option value="">All workstations</option>
-            {v.wsList.map((x) => <option key={x} value={x}>{/^\d/.test(x) ? `WS ${x}` : x}</option>)}
-          </select>
+          {mode === "time" && (
+            <select value={ws} onChange={(e) => setWs(e.target.value)} aria-label="Workstation">
+              <option value="">All workstations</option>
+              {v.wsList.map((x) => <option key={x} value={x}>{/^\d/.test(x) ? `WS ${x}` : x}</option>)}
+            </select>
+          )}
           <button className={styles.btn} onClick={load} disabled={loading}>Refresh</button>
         </div>
       </div>
@@ -155,9 +168,11 @@ export default function DashboardPage() {
       {err && <p className={styles.error}>{err}</p>}
       {data?.warnings.map((w, i) => <p key={i} className={styles.warn}>{w}</p>)}
 
-      {!loading && !err && v.rows.length === 0 && <p className={styles.sub}>No runs match these filters.</p>}
+      {mode === "output" && <Output all={data?.runs ?? []} era={era} />}
+      {mode === "output" && <Quality all={data?.runs ?? []} era={era} />}
+      {mode === "time" && !loading && !err && v.rows.length === 0 && <p className={styles.sub}>No runs match these filters.</p>}
 
-      {v.rows.length > 0 && (
+      {mode === "time" && v.rows.length > 0 && (
         <>
           <div className={styles.kpis}>
             {[
